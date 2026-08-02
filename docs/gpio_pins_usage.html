@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>GPIO pins usage</title>
+  </head>
+  <body>
+    <h1>&nbsp;The GPIO pins usage:</h1>
+    <p>Reference: <a
+href="https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/gpio.html">docs.espressif.com/peripherals/gpio.html</a>
+      <br>
+    </p>
+    <table>
+      <thead><tr>
+          <th><b>Digital</b></th>
+          <th><b>Analog</b></th>
+          <th><b>Not to be used because:</b></th>
+        </tr>
+      </thead><tbody>
+        <tr>
+          <td><strike>GPIO0</strike></td>
+          <td><strike>ADC2_CH1</strike></td>
+          <td> Strapping pin (MTDI); ADC2 used for Wifi </td>
+        </tr>
+        <tr>
+          <td><strike>GPIO1</strike></td>
+          <td>NO</td>
+          <td> TXD used for loading software of flash memory and serial
+            console debug<br>
+          </td>
+        </tr>
+        <tr>
+          <td><strike>GPIO2</strike></td>
+          <td><strike>ADC2_CH2</strike></td>
+          <td> Strapping pin (MTDI); ADC2 used for Wifi </td>
+        </tr>
+        <tr>
+          <td><strike>GPIO3</strike></td>
+          <td>NO</td>
+          <td> RXD used for loading software of flash memory and serial
+            console debug</td>
+        </tr>
+        <tr>
+          <td> GPIO4 </td>
+          <td><strike>ADC2_CH0</strike></td>
+          <td> GPIO OK; ADC2 used for Wifi </td>
+        </tr>
+        <tr>
+          <td><strike>GPIO5</strike></td>
+          <td>NO</td>
+          <td> Strapping pin (MTDI) </td>
+        </tr>
+        <tr>
+          <td><strike>GPIO6</strike></td>
+          <td>NO</td>
+          <td> SPI0/1 connected to the SPI flash and PSRAM memories
+            integrated on the module </td>
+        </tr>
+        <tr>
+          <td><strike>GPIO7</strike></td>
+          <td>NO</td>
+          <td> SPI0/1 connected to the SPI flash and PSRAM memories
+            integrated on the module </td>
+        </tr>
+        <tr>
+          <td><strike>GPIO8</strike></td>
+          <td>NO</td>
+          <td> SPI0/1 connected to the SPI flash and PSRAM memories
+            integrated on the module </td>
+        </tr>
+        <tr>
+          <td><strike>GPIO9</strike></td>
+          <td>NO</td>
+          <td> SPI0/1 connected to the SPI flash and PSRAM memories
+            integrated on the module </td>
+        </tr>
+        <tr>
+          <td><strike>GPIO10</strike></td>
+          <td>NO</td>
+          <td> SPI0/1 connected to the SPI flash and PSRAM memories
+            integrated on the module </td>
+        </tr>
+        <tr>
+          <td><strike>GPIO11</strike></td>
+          <td>NO</td>
+          <td> SPI0/1 connected to the SPI flash and PSRAM memories
+            integrated on the module </td>
+        </tr>
+        <tr>
+          <td> GPIO12 </td>
+          <td><strike>ADC2_CH5</strike></td>
+          <td> Strapping pin (MTDI); GPIO OK if not used for JTAG
+            debugging; ADC2 used for Wifi </td>
+        </tr>
+        <tr>
+          <td> GPIO13 </td>
+          <td><strike>ADC2_CH4</strike></td>
+          <td> GPIO OK&nbsp; if not used for JTAG (Joint Test Action
+            Group) debugging; ADC2 used for Wifi </td>
+        </tr>
+        <tr>
+          <td> GPIO14 </td>
+          <td><strike>ADC2_CH6</strike></td>
+          <td> GPIO OK&nbsp; if not used for JTAG (Joint Test Action
+            Group) debugging;&nbsp; ADC2 used for Wifi </td>
+        </tr>
+        <tr>
+          <td> GPIO15 </td>
+          <td><strike>ADC2_CH3</strike></td>
+          <td> Strapping pin (MTDIO); GPIO OK&nbsp; if not used for JTAG
+            debugging; ADC2 used for Wifi </td>
+        </tr>
+        <tr>
+          <td><strike>GPIO16</strike></td>
+          <td>NO</td>
+          <td> SPI0/1 connected to the SPI flash and PSRAM memories
+            integrated on the module </td>
+        </tr>
+        <tr>
+          <td><strike>GPIO17</strike></td>
+          <td>NO</td>
+          <td> SPI0/1 connected to the SPI flash and PSRAM memories
+            integrated on the module </td>
+        </tr>
+        <tr>
+          <td> GPIO18 </td>
+          <td>NO</td>
+          <td>GPIO OK</td>
+        </tr>
+        <tr>
+          <td> GPIO19 </td>
+          <td>NO</td>
+          <td>GPIO OK</td>
+        </tr>
+        <tr>
+          <td> GPIO21 </td>
+          <td>NO</td>
+          <td>GPIO OK</td>
+        </tr>
+        <tr>
+          <td> GPIO22 </td>
+          <td>NO</td>
+          <td>GPIO OK</td>
+        </tr>
+        <tr>
+          <td> GPIO23 </td>
+          <td>NO</td>
+          <td>GPIO OK</td>
+        </tr>
+        <tr>
+          <td> GPIO25 </td>
+          <td><strike>ADC2_CH8</strike>, DAC0</td>
+          <td> GPIO OK; ADC2 used for Wifi; on board 8 bits DAC </td>
+        </tr>
+        <tr>
+          <td> GPIO26 </td>
+          <td><strike>ADC2_CH9</strike>, DAC1</td>
+          <td> GPIO OK; ADC2 used for Wifi; on board 8 bits DAC </td>
+        </tr>
+        <tr>
+          <td> GPIO27 </td>
+          <td><strike>ADC2_CH7</strike></td>
+          <td> GPIO OK; ADC2 used for Wifi </td>
+        </tr>
+        <tr>
+          <td> GPIO32 </td>
+          <td> ADC1_CH4 </td>
+          <td>GPIO OK</td>
+        </tr>
+        <tr>
+          <td> GPIO33 </td>
+          <td> ADC1_CH5 </td>
+          <td>GPIO OK</td>
+        </tr>
+        <tr>
+          <td> GPIO34 </td>
+          <td> ADC1_CH6 </td>
+          <td> GPI input mode only, without software-enabled pullup or
+            pulldown, no interrupt usable </td>
+        </tr>
+        <tr>
+          <td> GPIO35 </td>
+          <td> ADC1_CH7 </td>
+          <td> GPI input mode only, without software-enabled pullup or
+            pulldown, no interrupt usable </td>
+        </tr>
+        <tr>
+          <td> GPIO36 </td>
+          <td> ADC1_CH0 </td>
+          <td> GPI input mode only, without software-enabled pullup or
+            pulldown, no interrupt usable </td>
+        </tr>
+        <tr>
+          <td> GPIO37 </td>
+          <td> ADC1_CH1 </td>
+          <td> GPI input mode only, without software-enabled pullup or
+            pulldown, no interrupt usable </td>
+        </tr>
+        <tr>
+          <td> GPIO38 </td>
+          <td> ADC1_CH2 </td>
+          <td> GPI input mode only, without software-enabled pullup or
+            pulldown, no interrupt usable </td>
+        </tr>
+        <tr>
+          <td> GPIO39 </td>
+          <td> ADC1_CH3 </td>
+          <td> GPI input mode only, without software-enabled pullup or
+            pulldown, no interrupt usable </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>

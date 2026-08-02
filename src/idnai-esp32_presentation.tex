@@ -1,0 +1,53 @@
+\documentclass{beamer}
+\usepackage{graphicx}
+\newcommand{\sframe}[2]{\begin{frame}\frametitle{#1}\vspace{-1cm}~#2\end{frame}}
+\newcommand{\sitem}{\\ - }
+\newcommand{\ssitem}{\\\hphantom{8mm}- }
+\newcommand{\sep}{\\~}
+
+\begin{document}
+
+\sframe{idnai-esp32 package: Motivation}{
+\sitem Fast and easy development of connected objects.
+\sep
+\sitem Allows projects:
+\ssitem cheap (ESP32 is a all in one cheap chip);
+\ssitem easy (only specific handle functions to define);
+\ssitem fast (elementary C programming).
+\sep
+\sitem The EPS32:
+\centerline{\includegraphics[height=0.3\textheight]{esp32-view.jpg}}
+}
+
+\sframe{The package functionalities}{
+\sitem Implements a generic setup and loop mechanism with:
+\ssitem WIFI automatic setup;
+\ssitem Web HTML page and Web service simple managements;
+\ssitem USB console management.
+\sep
+\sitem Makes available:
+\ssitem A fill-in web-service with from user handler;
+\ssitem Basic I/O functions documentation;
+\ssitem Time measurement functions;
+\ssitem Periodic or delayed functions.
+\sep
+\sitem Helps development with:
+\ssitem Elaborated echo functions for debug;
+\ssitem User I/O web interface and I/O web service;
+\ssitem Documented examples.
+}
+
+\sframe{How to ?}{
+Everything is documented on the home page.
+\sep
+\sitem Once:
+\ssitem Install the Arduino IDE on your desktop computer.
+\ssitem Install your ESP32 project, from `idnai-esp32`.
+\sep
+\sitem Then:
+\ssitem Develop your hardware once or step by step. 
+\ssitem Connect the board on the desktop via USB.
+\ssitem Starts the compilation/load/check/correct work loop.
+}
+
+\end{document}

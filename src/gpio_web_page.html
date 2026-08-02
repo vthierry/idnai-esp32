@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <title>GPIO board control panel</title>
+    <link rel='stylesheet' href='https://line.gitlabpages.inria.fr/aide-group/esp32gpiocontrol/webcontrols.css'/>
+    <script type='text/javascript' src='https://line.gitlabpages.inria.fr/aide-group/esp32gpiocontrol/webcontrols.js'></script>
+  </head>
+  <body style='width:820px'>
+    <h1>GPIO board control panel</h1>
+    <div class='button-bar'>
+      <b>Pin index:</b>
+      <input id='index' type='text' value='13' size='3'/>
+    </div>
+    <div class='button-bar'>
+      <b>Digital I/O:</b>
+      <button onclick='doCurl("@/gpio", "value=1", "POST")' style='background-color:red'>ON</button>
+      <button onclick='doCurl("@/gpio", "value=0", "POST")' style='background-color:lightgreen'>OFF</button>
+      <button onclick='doCurl("@/gpio", "", "POST")' class='button' style='background-color:magenta'>Get</button> 
+      <button onclick='doCurl("@/gpio", "mode=up", "POST")' class='button' style='background-color:magenta'>Get up</button> 
+      <button onclick='doCurl("@/gpio", "mode=down", "POST")' class='button' style='background-color:magenta'>Get down</button> 
+   </div>
+    <div class='button-bar'>
+      <b>Timing measure:</b>
+      <script>webcontrols.addButtonOnOff("timing", { on_text: "Start", off_text: "Stop"}, function(value) {
+        doCurl("@/gpio", "action=" + (value ? "start" : "stop"), "POST");
+      });</script>
+      <button onclick='doCurl("@/gpio", "action=get", "POST")' style='background-color:magenta'>Get</button>
+    </div>
+    <div class='button-bar'>
+      <b>Analog I/O:</b>
+      <script>webcontrols.addButtonRange("Analog value", {});</script>
+      <button onclick='doCurl("@/gpio", "mode=analog&value="+analog_value, "POST")' style='background-color:yellow'>Put</button>
+      <button onclick='doCurl("@/gpio", "mode=analog", "POST")' style='background-color:magenta'>Get</button>
+    </div>
+    <script>
+      webcontrols.addConsole(true);
+      function doCurl(url, input, method) {
+        let index = document.getElementById("index").value;
+        webcontrols.curl(url, input+"&index="+index, method);
+      }
+    </script>
+    <div class='button-bar'>
+      <button title='Pings the web service to verify if alive' onclick='webcontrols.curl("@/hi", "", "GET")' style='background-color:yellow'>Ping</button>
+       <button title='Returns the loop() delay time' onclick='webcontrols.curl("@/loop", "", "GET")' style='background-color:blue'>Loop</button>
+     <button title='Restarts the ESP32 microcontroler' onclick='webcontrols.curl("@/restart", "", "POST")' style='background-color:magenta'>Restart</button>
+     <button title='Halts the ESP32 microcontroler (deep sleeping mode)' onclick='webcontrols.curl("@/sleep", "", "POST")' style='background-color:red'>Halt</button>
+    </div>
+  </body>
+</html>
