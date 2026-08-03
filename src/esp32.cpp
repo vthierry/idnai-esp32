@@ -699,9 +699,10 @@ void setup()
   // Connects to the Wifi network
   {
     echo("+ Connecting to wifi …"), echoFlush();
+    WiFi.disconnect(true);
+    WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
     WiFi.setHostname(HOSTNAME);
     WiFi.mode(WIFI_STA);
-    WiFi.disconnect();
 #if WIFI_SCAN_METHOD
     // Network scanning method
     unsigned int N = WiFi.scanNetworks();
