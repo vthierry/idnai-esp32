@@ -12,24 +12,24 @@
     </div>
     <div class='button-bar'>
       <b>Digital I/O:</b>
-      <button onclick='doCurl("@/gpio", "value=1", "POST")' style='background-color:red'>ON</button>
-      <button onclick='doCurl("@/gpio", "value=0", "POST")' style='background-color:lightgreen'>OFF</button>
-      <button onclick='doCurl("@/gpio", "", "POST")' class='button' style='background-color:magenta'>Get</button> 
-      <button onclick='doCurl("@/gpio", "mode=up", "POST")' class='button' style='background-color:magenta'>Get up</button> 
-      <button onclick='doCurl("@/gpio", "mode=down", "POST")' class='button' style='background-color:magenta'>Get down</button> 
+      <button onclick='doCurl("@/gpio", "value=1")' style='background-color:red'>ON</button>
+      <button onclick='doCurl("@/gpio", "value=0")' style='background-color:lightgreen'>OFF</button>
+      <button onclick='doCurl("@/gpio", "")' class='button' style='background-color:magenta'>Get</button> 
+      <button onclick='doCurl("@/gpio", "mode=up")' class='button' style='background-color:magenta'>Get up</button> 
+      <button onclick='doCurl("@/gpio", "mode=down")' class='button' style='background-color:magenta'>Get down</button> 
    </div>
     <div class='button-bar'>
       <b>Timing measure:</b>
       <script>webcontrols.addButtonOnOff("timing", { on_text: "Start", off_text: "Stop"}, function(value) {
-        doCurl("@/gpio", "action=" + (value ? "start" : "stop"), "POST");
+        doCurl("@/gpio", "action=" + (value ? "start" : "stop"));
       });</script>
-      <button onclick='doCurl("@/gpio", "action=get", "POST")' style='background-color:magenta'>Get</button>
+      <button onclick='doCurl("@/gpio", "action=get")' style='background-color:magenta'>Get</button>
     </div>
     <div class='button-bar'>
       <b>Analog I/O:</b>
       <script>webcontrols.addButtonRange("Analog value", {});</script>
-      <button onclick='doCurl("@/gpio", "mode=analog&value="+analog_value, "POST")' style='background-color:yellow'>Put</button>
-      <button onclick='doCurl("@/gpio", "mode=analog", "POST")' style='background-color:magenta'>Get</button>
+      <button onclick='doCurl("@/gpio", "mode=analog&value="+analog_value)' style='background-color:yellow'>Put</button>
+      <button onclick='doCurl("@/gpio", "mode=analog")' style='background-color:magenta'>Get</button>
     </div>
     <script>
       webcontrols.addConsole(true);
@@ -39,10 +39,10 @@
       }
     </script>
     <div class='button-bar'>
-      <button title='Pings the web service to verify if alive' onclick='webcontrols.curl("@/hi", "", "GET")' style='background-color:yellow'>Ping</button>
-       <button title='Returns the loop() delay time' onclick='webcontrols.curl("@/loop", "", "GET")' style='background-color:blue'>Loop</button>
-     <button title='Restarts the ESP32 microcontroler' onclick='webcontrols.curl("@/restart", "", "POST")' style='background-color:magenta'>Restart</button>
-     <button title='Halts the ESP32 microcontroler (deep sleeping mode)' onclick='webcontrols.curl("@/sleep", "", "POST")' style='background-color:red'>Halt</button>
+      <button title='Pings the web service to verify if alive' onclick='webcontrols.curl("@/hi", "")' style='background-color:yellow'>Ping</button>
+       <button title='Returns the loop() delay time' onclick='webcontrols.curl("@/loop", "")' style='background-color:blue'>Loop</button>
+     <button title='Restarts the ESP32 microcontroler' onclick='webcontrols.curl("@/restart", "")' style='background-color:magenta'>Restart</button>
+     <button title='Halts the ESP32 microcontroler (deep sleeping mode)' onclick='webcontrols.curl("@/sleep", "")' style='background-color:red'>Halt</button>
     </div>
   </body>
 </html>

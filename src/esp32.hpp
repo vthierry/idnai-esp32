@@ -3,29 +3,26 @@
 
 #include "hostname.h"
 
-extern bool VERBOSE;
+// String manipulation
 
 #include "string.h"
+const char *secho(const char *fmt, ...);
 
 // Serial interface echo method
 
-void echo(const char *fmt, ...);
-void echoFlush();
-const char *secho(const char *fmt, ...);
+void console_echo(bool ok, const char *fmt = NULL, ...);
 
-// Web server functionalities
+// Web service functionalities
 
-extern WebServer *server;
+void service_on(String route, void (*handler)(void));
 
-void answer(bool ok, const char *fmt, ...);
+const char *service_get(String name);
+	       
+void service_answer(bool ok, const char *fmt, ...);
 
 // Useful macros
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
-
-// GPIO maximal index value < MAX_GPIO_INDEX, this does NOT mean that the pin is usable, see ./gpio_pins_usage.html
-
-#define MAX_GPIO_INDEX 40
 
 // Digital timing definitions
 
@@ -35,24 +32,19 @@ double getLoopDelay();
 
 double getLastLoopDelay();
 
-typedef void (*handler)(void);
+void setInterval(handler call, unsigned int index = 0, double delay = 0, unsigned int count = -1);
 
-void setInterval(handler call, double delay = 0, unsigned int count = -1);
+#define time_measurement_start(index, mode) double interruptTime_ ## index = -1; void IRAM_ATTR time_measurement_handle_ ## index() { if(interruptTime_ ## index == -1) interruptTime_ ## index = fmillis(); } pinMode(index, INPUT_PULLUP); attachInterrupt(digitalPinToInterrupt(index), time_measurement_handle_ ## index, mode)
+#define time_measurement_stop(index) detachInterrupt(digitalPinToInterrupt(index))
+#define time_measurement_reset(index) interruptTime_ ## index = -1; 
+#define time_measurement_get(index) interruptTime_ ## index
 
-void gpio_digital_timing_start(unsigned int index, unsigned int mode = RISING, handler handle_run = NULL);
-
-void gpio_digital_timing_stop(unsigned int index);
-
-double gpio_digital_timing_get(unsigned int index);
-
-void gpio_square_wave(unsigned int index, double frequency = 1, double duration = 300, bool sync = false);
+#define square_wave_start(timerIndex, outputPinIndex, frequency, duration) void IRAM_ATTR square_wave_handler_ ## outputPinIndex() { static bool up_else_down = false; digitalWrite(outputPinIndex, up_else_down = !up_else_down); } pinMode(outputPinIndex, OUTPUT); digitalWrite(outputPinIndex, 0); setInterval(timerIndex, square_wave_handler_ ## outputPinIndex, (int) rint(0.5 / frequency), duration == 0 ? -1 : 2 * (int) rint(duration * frequency)
 
 // Analog interface
 
 #define ANALOG_OUTPUT OUTPUT | 0x10
 #define ANALOG_INPUT INPUT | 0x10
-
-extern String pinModeError;
 
 void pinMode(unsigned int index, unsigned int mode, bool check);
 

@@ -56,40 +56,34 @@ void setup_handles()
   // Here comes the code to init the hardware and/or application specific variables.
 
   // This is how an web service handle is hooked to the web service.
-  server->on("/$hostname", HTTP_POST, handle_$hostname);
+  server_on("/$hostname", handle_$hostname);
 
   //
   // Predefined web servive handle
   // => Comment or delete the lines of code to invalidate them
   //
   
-  // Answers ``Hi´´ to confirm the web service is alive
-  server->on("/hi", HTTP_GET, handle_alive);
-
-  // Returns the delay alive delay and the average and last loop delay
-  server->on("/loop", HTTP_GET, handle_loop);
+  // Confirms the web service is alive
+  // - Returns the alive delay and the average and last loop delay
+  server_on("/hi", handle_alive);
 
   // Restarts the processor
-  server->on("/restart", HTTP_POST, handle_restart);
+  server_on("/restart", handle_restart);
 
   // Put the processor in deep sleep
-  server->on("/sleep", HTTP_POST, handle_sleep);
+  server_on("/sleep", handle_sleep);
 
   // Handles the web pages
-  server->on("/", HTTP_GET, handle_web_page);
-  server->on("/index.html", HTTP_GET, handle_web_page);
+  server_on("/", handle_web_page);
 
   // Handles the GPIO generic I/O web page
-  server->on("/gpio", HTTP_POST, handle_gpio);
-  server->on("/gpio.html", HTTP_GET, handle_gpio_web_page);
+  server_on("/gpio", handle_gpio);
 }
 EOF
 fi
 
-ln -s node_modules/indnai-esp32/src/esp32.cpp .
-
-ln -s node_modules/indnai-esp32/src/gpio_web_page.html .
+ln -s node_modules/indnai-esp32/src/esp32.cpp
 
 ln -s node_modules/indnai-esp32/src/gpio_handles.cpp
  
-git add $NAME.ino hostname.h setup_handles.cpp verbose.h esp32.cpp gpio_web_page.html gpio_handles.cpp
+git add $NAME.ino hostname.h setup_handles.cpp verbose.h esp32.cpp gpio_handles.cpp
