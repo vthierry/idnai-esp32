@@ -17,25 +17,23 @@
 // This is the version of the current framework
 #define IDNAI_ESP32_VERSION "1.0.1"
 
-// This defines the hostname
-#define "hostname.h"
-
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-#include <stdarg.h>
+#include "esp32.hpp"
 
 // Implements the variable argument à-la printf mechanism
 
-const static unsigned int arg2chars_buffer_size = 1024;
-unsigned int arg2chars_buffer_length = 0;
-char arg2chars_buffer[arg2chars_buffer_size + 1] = "";
-#define arg2chars() { va_list a; va_start(a, fmt); arg2chars_buffer_length = vsnprintf(arg2chars_buffer, arg2chars_buffer_size, fmt, a); va_end(a); }
-
-const char *secho(const char *fmt, ...)
+std::string echo(String message, ...)
 {
-  arg2chars();
-  return arg2chars_buffer;
+  static const unsigned int message_buffer_size = 64 * 1024;
+  static char chars_buffer[message_buffer_size];
+  {
+    va_list args;
+    va_start(args, message);
+    vsnprintf(chars_buffer, message_buffer_size, message.c_str(), args);
+    va_end(args);
+  }
+  return chars_buffer;
 }
 
 // Implements the console echo with buffering management
@@ -44,8 +42,8 @@ void console_echo(bool flush, const char *fmt = NULL, ...)
 {
   static String buffer = "";
   if (fmt != NULL) {
-    arg2chars();
-    buffer += arg2chars_buffer + '\n';
+    ECHO(string, fmt);
+    buffer += string + '\n';
   }
   if (flush && buffer.length > 0) {
     Serial.write(buffer), Serial.flush(), buffer = "";
@@ -71,9 +69,9 @@ void service_answer(bool ok, const char *fmt = NULL, ...)
     server->sendHeader("Access-Control-Allow-Origin", "*");
     server->sendHeader("Access-Control-Allow-Methods", "GET, POST");
     if (fmt != NULL) {
-      arg2chars();
-      String s(arg2chars_buffer).trim();
-      server->send(ok ? 200 : 400, s[0] == '<' ? "text/html" : s[0] == '{' ? "application/json": "text/plain", arg2chars_buffer);
+      ECHO(string, fmt);
+      String s(string).trim();
+      server->send(ok ? 200 : 400, s[0] == '<' ? "text/html" : s[0] == '{' ? "application/json": "text/plain", string);
     } else {
       server->send(204, "", NULL);
     }
@@ -87,8 +85,8 @@ void service_answer(bool ok, const char *fmt = NULL, ...)
 void pinMode(unsigned int index, unsigned int mode, bool check)
 {
   if(check) {
-    bool analog = (mode & 0x10) != 0, input = (mode & 0x0F) != 3, pulling = (mode & 0x0C) != 0;
-    // Notice: OUTPUT: 1+2, INPUT: 1, INPUT_PULLUP: 1+4, INPUT_PULLDOWN: 1+8, ANALOG_(IN|OUT)PUT = (IN|OUT)PUT | 0x10
+    bool analog = (mode & 0x10) != 0, input = (mode & 0x0F) != 3, pulling = (mode & 0x0C) != 0, pwm = 0x20) != 0;
+    // Notice: OUTPUT: 1+2, INPUT: 1, INPUT_PULLUP: 1+4, INPUT_PULLDOWN: 1+8, ANALOG_(IN|OUT)PUT = (IN|OUT)PUT | 0x10, ANALOG_PWM = OUTPUT | 0x2
     switch(mode) {
     case INPUT:
     case OUTPUT:
@@ -96,32 +94,33 @@ void pinMode(unsigned int index, unsigned int mode, bool check)
     case INPUT_PULLDOWN:
     case ANALOG_INPUT:
     case ANALOG_OUTPUT:
+    case ANALOG_PWM:
       break;
     default:
-      console_echo(true, "Spurious mode value: %d", mode);
+      console_echo(false, "pinMode illegal-argument: Spurious mode value: 0x%x", mode);
       break;
     }
     if(analog) {
       if(input) {
         if(!(32 <= index && index <= 39)) {
-          console_echo(true, "Invalid analog input index, not in {32,39} (ADC2 is used for wifi)");
+          console_echo(false, "pinMode illegal-argument: Invalid analog input index, not in {32,39} (ADC2 is used for wifi)");
         }
       } else {
         if(!(24 <= index && index <= 26)) {
-          console_echo(true, "Invalid analog output index, not in {25,26}");
+          console_echo(false, "pinMode illegal-argument: Invalid raw analog output index, not in {25,26}");
         }
       }
     } else {
       if(!(4 == index || (12 <= index && index <= 15) || (18 <= index && index <= 27) || (32 <= index && index <= 39))) {
-        console_echo(true, "Invalid digital input index, not in {4} + {12,15} + {18,27} + {32,39}, reserved for other usage");
+        console_echo(false, "pinMode illegal-argument: Invalid digital input index, not in {4} + {12,15} + {18,27} + {32,39}, reserved for other usage");
       }
       if(34 <= index && index <= 39) {
         if(input) {
           if(pulling) {
-            console_echo(true, "No pulling interface for input with an index in {32,39}");
+            console_echo(false, "pinMode illegal-argument: No pulling interface for input with an index in {32,39}");
           }
         } else {
-          console_echo(true, "No output interface with an index in {34,39}");
+          console_echo(false, "pinMode illegal-argument: No output interface with an index in {34,39}");
         }
       }
     }
@@ -129,9 +128,33 @@ void pinMode(unsigned int index, unsigned int mode, bool check)
   pinMode(index, mode & 0xF);
 }
 
+void analogPWMWrite(unsigned int index, unsigned int value = 0, unsigned int resolution = 13, unsigned int frequency = 5000) {
+  // Defines output-channel correspondences
+  static int channel = 0, channels[40] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+  if (index < 40) {
+    // Allocates a PWM channel if needed
+    if (channels[index] == -1) {
+      if (channel < 16) {
+	unsigned int f = (int) rint(40e^6/pow(2, resolution));
+	if (f < frequency)
+	  console_echo(false, "analogPWMWrite illegal-argument: Spurious frequency %d higher that the maximum %d", frequency, f);
+	ledcSetup(channel, frequency > f ? f : frequency, resolution);
+	ledcAttachPin(index, channel);
+	channels[index] = channel++;
+	ledcWrite(channels[index], value);
+      } else
+	console_echo(false, "analogPWMWrite illegal-argument: using more than 16 PWM channels for index %d, the operation is inoperent", index);
+    } else
+      ledcWrite(channels[index], value);
+  } else
+    console_echo(false, "analogPWMWrite illegal-argument: spurious index %d, the operation is inoperent", index);
+}
+
+#if RAW_DAC
+
 #include "driver/dac_oneshot.h"
 
-int analogRawWrite(unsigned int index, unsigned int value)
+void analogRawWrite(unsigned int index, unsigned int value)
 {
   if(index == 25 || index == 26) {
     static bool init[2] = { false, false };
@@ -142,16 +165,18 @@ int analogRawWrite(unsigned int index, unsigned int value)
       config[i].chan_id = i == 0 ? DAC_CHAN_0 : DAC_CHAN_1;
       int s = dac_oneshot_new_channel(&config[i], &handle[i]);
       if(s != ESP_OK) {
-        return -2;
+	console_echo(false, "analogRawWrite illegal-argument: unable to initialize using `dac_oneshot_new_channel()`, for index %d", index);
       }
       init[i] = true;
     }
     dac_oneshot_output_voltage(handle[i], value < 255 ? value : 255);
     return true;
   } else {
-    return -1;
+    console_echo(false, "analogRawWrite illegal-argument: spurious index %d, the operation is inoperent", index);
   }
 }
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -232,42 +257,60 @@ void updateLoopDelay()
 //  - https://docs.espressif.com/projects/esp-idf/en/v3.3.5/api-reference/peripherals/timer.html
 //  - https://esp32.com/viewtopic.php?t=23372
 
-static (void (*)(void)) setIntervalHandler[4];
-static unsigned int setIntervalCounts[4];
+static (void (*)(void)) runHandlers[4] = {NULL, NULL, NULL, NULL};
+static bool runHandlerFlag[4] = {true, true, true, true};
+static unsigned int runHandlerCounts[4] = {0, 0, 0, 0};
+static unsigned int runHandlerIndexes[index] = {0, 1, 2, 3};
+static double runHandlerDurations[index] = {0, 0, 0, 0};
+static double runHandlerLastDurations[index] = {0, 0, 0, 0};
 
-static void IRAM_ATTR setIntervalTimerHandler(unsigned int* index) {
-  if (setIntervalCounts[index] != 0) {
-    (setIntervalHandler[*index])();
-    if (setIntervalCounts[index] != -1)
-      setIntervalCounts[index]--;
+static void IRAM_ATTR runTimerHandler(unsigned int* index) {
+  double now = fmillis();
+  if (runHandlerFlag[index] && runHandlerCounts[index] != 0) {
+    runHandlerFlag[index] = false;
+    (runHandlers[*index])();
+    if (runHandlerCounts[index] != -1)
+      runHandlerCounts[index]--;
+    runHandlerDurations[index] += 0.2 * ((runHandlerLastDurations[index] = fmillis() - now) - runHandlerDurations[index]);
+    runHandlerFlag[index] = true;
   }
 }
-
-void setInterval(unsigned int index, double delay, unsigned int count, void (handler *)(void), )
+void runHandler(unsigned int index, double delay, unsigned int count, void (handler *)(void), )
 {
   if (index < 4) {
     unsigned int timer_gpx = 0x1 & (index >> 1), timer_idx = 0x1 & index;
-    if (delay > 0) {
-      timer_config_t config = {
-	.alarm_en = true,
-	.counter_en = false,
-	.intr_type = TIMER_INTR_LEVEL,
-	.counter_dir = TIMER_COUNT_UP,
-	.auto_reload = true,
-	.divider = 80
-      };
-      setIntervalHandler[index] = handler;
-      setIntervalCounts[index] = count;
-      timer_init(timer_gpx, timer_idx, &config);
-      timer_set_counter_value(timer_gpx, timer_idx, 0);
-      timer_set_alarm_value(timer_gpx, timer_idx, (int) rint(1000 * delay));
-      timer_enable_intr(timer_gpx, timer_idx);
-      timer_isr_register(timer_gpx, timer_idx, setIntervalTimerHandler, (void *) index, ESP_INTR_FLAG_IRAM, NULL);
-      timer_start(timer_gpx, timer_idx);
-    } else {
+    if (delay < 0) {
       timer_stop(timer_gpx, timer_idx);
+    } else {
+      if (1000 * delay < pow(2, 64)) {
+	timer_config_t config = {
+	  .alarm_en = true,
+	  .counter_en = false,
+	  .intr_type = TIMER_INTR_LEVEL,
+	  .counter_dir = TIMER_COUNT_UP,
+	  .auto_reload = true,
+	  .divider = 80
+	};
+	runHandlers[index] = handler;
+	runHandlerFlag[index] = true;
+	runHandlerCounts[index] = count;
+	timer_init(timer_gpx, timer_idx, &config);
+	timer_set_counter_value(timer_gpx, timer_idx, 0);
+	timer_set_alarm_value(timer_gpx, timer_idx, (int) rint(1000 * delay));
+	timer_enable_intr(timer_gpx, timer_idx);
+	timer_isr_register(timer_gpx, timer_idx, runTimerHandler, (void *) &runHandlerIndexes[index], ESP_INTR_FLAG_IRAM, NULL);
+	timer_start(timer_gpx, timer_idx);
+      } else 
+	console_echo(false, "runHandler illegal-argument: spurious delay %e, yielding counter overflow, the operation is inoperent", index);
     }
-  }
+  } else
+    console_echo(false, "runHandler illegal-argument: spurious timer index %d, the operation is inoperent", index);
+}
+double getRunHandlerDelay(unsigned int index) {
+  return index < 4 ? runHandlerDurations[index] : 0;
+}
+double getRunHandlerLastDelay(unsigned int index) {
+  return index < 4 ? runHandlerLastDurations[index] : 0;
 }
  
 ////////////////////////////////////////////////////////////////////////////////
