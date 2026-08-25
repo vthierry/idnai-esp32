@@ -190,10 +190,10 @@ void analogRawWrite(unsigned int index, unsigned int value)
 
 double loopDelay = 0, lastLoopDelay = 0;
 
-double fmillis(bool reset)
+double now(bool reset)
 {
   /*
-   *  - Value analysis
+   *  - Value analysis:
    *   - The micros() function:
    *     - returns a number between 0 to 2^32 - 1 = 4294967295,
    *     - rolls back to 0 when reaching the maximum, after 71.5 minutes
@@ -202,21 +202,21 @@ double fmillis(bool reset)
    *     - Full precision is thus maintained for 2^52/10^6/3600/24/365.25 = 142 years.
    *     - Maximal value is 2^52x2^(2^11-1023)/10^6/3600/24/365.25 > the 14 x 10^9 years universe age.
    *  - Overflow management:
-   *   - This fmillis() function must be called about every hour, otherwise overflow is missed.
+   *   - This now() function must be called least about every hour, otherwise overflow is missed.
    *   - Since in it is called by updateLoopDelay() the condition is fulfilled.
    */
   static double offset = 0;
   static unsigned long previous = 0;
-  unsigned long now = micros();
+  unsigned long unow = micros();
   if(reset) {
     offset = -0.001 * now;
   } else {
-    if(now + 1000000 < previous) {
-      offset += 4294967.295;
+    if(unow + 1000000 < previous) {
+      offset += 4294.967295;
     }
   }
-  previous = now;
-  return offset + 0.001 * now;
+  previous = unow;
+  return offset + 1e-6 * unow;
 }
 double getLoopDelay()
 {
@@ -246,7 +246,7 @@ void updateLoopDelay()
    */
   const static double a = 0.2;
   static double previous = 0;
-  double now = fmillis();
+  double now = now();
   lastLoopDelay = now - previous, previous = now, loopDelay += a * (lastLoopDelay - loopDelay);
 }
 
@@ -265,13 +265,13 @@ static double runHandlerDurations[index] = {0, 0, 0, 0};
 static double runHandlerLastDurations[index] = {0, 0, 0, 0};
 
 static void IRAM_ATTR runTimerHandler(unsigned int* index) {
-  double now = fmillis();
+  double now = now();
   if (runHandlerFlag[index] && runHandlerCounts[index] != 0) {
     runHandlerFlag[index] = false;
     (runHandlers[*index])();
     if (runHandlerCounts[index] != -1)
       runHandlerCounts[index]--;
-    runHandlerDurations[index] += 0.2 * ((runHandlerLastDurations[index] = fmillis() - now) - runHandlerDurations[index]);
+    runHandlerDurations[index] += 0.2 * ((runHandlerLastDurations[index] = now() - now) - runHandlerDurations[index]);
     runHandlerFlag[index] = true;
   }
 }
@@ -282,7 +282,7 @@ void runHandler(unsigned int index, double delay, unsigned int count, void (hand
     if (delay < 0) {
       timer_stop(timer_gpx, timer_idx);
     } else {
-      if (1000 * delay < pow(2, 64)) {
+      if (1e6 * delay < pow(2, 64)) {
 	timer_config_t config = {
 	  .alarm_en = true,
 	  .counter_en = false,
@@ -325,10 +325,10 @@ WebServer *server = NULL;
 void updateWebServer()
 {
   static double when = 0;
-  double now = fmillis();
+  double now = now();
   // Handles queries, if the server is defined, every 10 msec
   if(server != NULL && now >= when) {
-    when = now + 10;
+    when = now + 0.010;
     server->handleClient();
   }
 }
@@ -339,7 +339,7 @@ void updateWebServer()
 
 void handle_alive()
 {
-  answer(true, "{ \"hostname\": \"%s\", \"query\": \"hi\", \"now\": %.3f, \"average-loop-delay\": %.3f, \"last-loop-delay\": %.3f }", HOSTNAME, fmillis(), getLoopDelay(), getLastLoopDelay());
+  answer(true, "{ \"hostname\": \"%s\", \"query\": \"hi\", \"now\": %.3f, \"average-loop-delay\": %.3f, \"last-loop-delay\": %.3f }", HOSTNAME, now(), getLoopDelay(), getLastLoopDelay());
 }
 void handle_restart()
 {
@@ -447,7 +447,7 @@ void setup()
       }
     }
   }
-  console_echo(true, "+ Setup done after %.0f milli-seconds", fmillis()), echoFlush();
+  console_echo(true, "+ Setup done after %.3f seconds", now()), echoFlush();
 
   // Turns onboard LED steady on, after blinking, to indicate setup success
   {
@@ -466,7 +466,7 @@ void setup()
 
 void loop()
 {
-  // Allows the fmillis() and getLoopDelay() functions to be effective.
+  // Allows the now() and getLoopDelay() functions to be effective.
   updateLoopDelay();
   // Allows the web server client request handling to be effective.
   updateWebServer();

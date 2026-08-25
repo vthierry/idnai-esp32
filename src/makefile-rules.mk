@@ -1,9 +1,8 @@
 # The idnai-esp32 specific development rules
 
-BUILD_ESP32 = build_esp32
+BUILD_ESP32 = $(patsubst %_h.html,%.h,$(wildcard *_h.html))
 
-%.hpp: %.html
-	@(echo -n "static char $*[] = \"" ; tr "\n" " " < $^ | sed 's/"/\\"/g' | sed 's/  */ /g' ; echo "\";") > $@
+BUILD += $(BUILD_ESP32)
 
 ifneq (,which xdotools)
 build_esp32: # build_esp32: Starts the idnai-esp32 IDE compilation, upload and run.
@@ -12,19 +11,16 @@ else
 	echo "Runs Sketch => Upload` (`CTRL+U` as shortcut) item of the `Arduino IDE` menu."
 endif
 
-show_esp32: # show_esp32: Opens the idnai-esp32 web pages, after setting the MAC or IP board address.
-ifneq (,which arp-scan)
-ifeq (,ls MAC.txt)
-	read -p "Please enter the MAC board address: " MAC ; echo "$$MAC" > MAC.txt
+## - Uses the xdotools, if installed, to trigger the Arduino IDE command, else to be done by hand.
+
+show_esp32: # show_esp32: Opens the idnai-esp32 web pages, setting the MAC board address if not yet done.
+ifeq (,$(shell isItOn $(NAME))
+	read -p "Please enter the MAC board address: " MAC ; if confirm "MAC=$$MAC OK" "Fine, please rerun" ; then isItOn $(NAME)=$$MAC > /dev/null ; fi
 endif
-	sudo arp-scan -lqx | grep "`cat MAC.txt`" | awk '{print $$1}' > IP.txt
-endif
-ifneq (,ls IP.txt)
-	read -p "The IP board address is "`cat IP.txt`", ok ? (y/n): " ok ; if [ "ok" \!= "y" ] ; /bin/rm -f IP.txt ; fi
-endif
-ifeq (,ls IP.txt)
-	read -p "Please enter the IP board address: " IP ; echo "$$IP" > IP.txt
-endif
-	IP="`cat IP.txt`" ;\
-	$(BROWSER) http://$(IP)/index.html ;\
-	$(BROWSER) http://$(IP)/gpio.html
+	IP="`isItOn $(NAME)`" ;\
+	$(BROWSER) http://$$IP/ ;\
+	$(BROWSER) http://$$IP/gpio.html
+
+## - Uses the isItOn utility to register the MAC address under the package name in 'node_modules/idnai-make/bin/.isItOn' file.
+##   - It is assumed that one package corresponds to a given ESP32 MAC address, for the tests.
+##   - Editing 'node_modules/idnai-make/bin/.isItOn' allows to adapt to another setup.

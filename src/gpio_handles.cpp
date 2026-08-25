@@ -10,19 +10,19 @@ void handle_digital_get_value(unsigned int index)
 {
   pinMode(index, INPUT, true);
   unsigned int value = digitalRead(index);
-  server_answer(true, "{\"what\": \"digital_get_value\", \"index\": %d, \"value\": %d, \"time\": %.3f}", index, value, fmillis());
+  server_answer(true, "{\"what\": \"digital_get_value\", \"index\": %d, \"value\": %d, \"now\": %.3f}", index, value, now());
 }
 void handle_digital_get_up_value(unsigned int index)
 {
   pinMode(index, INPUT_PULLDOWN, true);
   unsigned int value = digitalRead(index);
-  server_answer(true, "{\"what\": \"digital_get_up_value\", \"index\": %d, \"value\": %d, \"time\": %.3f}", index, value, fmillis());
+  server_answer(true, "{\"what\": \"digital_get_up_value\", \"index\": %d, \"value\": %d, \"now\": %.3f}", index, value, now());
 }
 void handle_digital_get_down_value(unsigned int index)
 {
   pinMode(index, INPUT_PULLUP, true);
   unsigned int value = digitalRead(index);
-  server_answer(true, "{\"what\": \"digital_get_down_value\", \"index\": %d, \"value\": %d, \"time\": %.3f}", index, value, fmillis());
+  server_answer(true, "{\"what\": \"digital_get_down_value\", \"index\": %d, \"value\": %d, \"now\": %.3f}", index, value, now());
 }
 void handle_digital_set_value(unsigned int index)
 {
@@ -30,7 +30,7 @@ void handle_digital_set_value(unsigned int index)
   pinMode(index, OUTPUT, true);
   digitalWrite(index, value == 0 ? 0 : 1);
   value = digitalRead(index);
-  server_answer(true, "{\"what\": \"digital_set_value\", \"index\": %d, \"value\": %d, \"time\": %.3f}", index, value, fmillis());
+  server_answer(true, "{\"what\": \"digital_set_value\", \"index\": %d, \"value\": %d, \"now\": %.3f}", index, value, now());
 }
 
 // ESP32 GPIO analog get and set value
@@ -46,10 +46,10 @@ void handle_analog_get_value(unsigned int index)
   analogSetAttenuation(range == 3 ? ADC_0db : range == 2 ? ADC_2_5db : range == 1 ? ADC_6db : ADC_11db);
   if(voltage_mode) {
     double value = 0.001 * analogReadMilliVolts(index);
-    server_answer(true, "{\"what\": \"analog_get_value\", \"index\": %d, \"range\": %d, \"value\": %.3f, \"time\": %.3f}", index, range, value, fmillis());
+    server_answer(true, "{\"what\": \"analog_get_value\", \"index\": %d, \"range\": %d, \"value\": %.3f, \"now\": %.3f}", index, range, value, now());
   } else {
     unsigned int value = analogRead(index);
-    server_answer(true, "{\"what\": \"analog_get_value\", \"index\": %d, \"range\": %d, \"value\": %d, \"time\": %.3f}", index, range, value, fmillis());
+    server_answer(true, "{\"what\": \"analog_get_value\", \"index\": %d, \"range\": %d, \"value\": %d, \"now\": %.3f}", index, range, value, now());
   }
 }
 void handle_analog_set_value(unsigned int index)
@@ -58,7 +58,7 @@ void handle_analog_set_value(unsigned int index)
   int value = server_get("value").toInt();
   value = value < 0 ? 0 : 255 < value ? 255 : value;
   int ok = analogRawWrite(index, value);
-  server_answer(true, "{\"what\": \"analog_set_value\", \"index\": %d, \"value\": %d, \"ok\": %d, \"time\": %.3f}", index, value, ok, fmillis());
+  server_answer(true, "{\"what\": \"analog_set_value\", \"index\": %d, \"value\": %d, \"ok\": %d, \"now\": %.3f}", index, value, ok, now());
 }
 
 // ESP32 GPIO digital square wave generator
@@ -68,7 +68,7 @@ void handle_square_wave(unsigned int index)
   double frequency = "" != server_get("frequency") ? server_get("frequency").toDouble() : 1;
   double duration = "" != server_get("duration") ? server_get("duration").toDouble() : 1000;
   square_wave_start(0, index, frequency, duration);
-  server_answer(true, "{\"what\": \"square_wave\", \"index\": %d, \"frequency\": %f, \"duration\": %f, \"time\": %.3f}", index, frequency, duration, fmillis());
+  server_answer(true, "{\"what\": \"square_wave\", \"index\": %d, \"frequency\": %f, \"duration\": %f, \"now\": %.3f}", index, frequency, duration, now());
 }
 
 // ESP32 GPIO digital time measurement mechanism
@@ -85,14 +85,14 @@ void handle_time_measurement(unsigned int index)
   } else if(action == "stop") {
     time_measurement_stop(index);
   }
-  server_answer(true, "{\"what\": \"time_measurement\", \"index\": %d, \"action\": \"%s\", %s\"value\": %.3f,\"time\": %.3f}", index, action.c_str(), modeLog.c_str(), time_measurement_get(index), fmillis());;
+  server_answer(true, "{\"what\": \"time_measurement\", \"index\": %d, \"action\": \"%s\", %s\"value\": %.3f,\"now\": %.3f}", index, action.c_str(), modeLog.c_str(), time_measurement_get(index), now());;
 }
 
 //
 // GPIO service
 //
 
-#include "node_modules/idnai-esp32/src/gpio_web_page.hpp"
+#include "node_modules/idnai-esp32/src/gpio_panel.h"
 
 void handle_gpio()
 {
@@ -129,7 +129,7 @@ void handle_gpio()
       server_answer(false, "{\"what\": \"gpio\", \"error\": \"spurious index\": %d}", index);
     }
   } else {
-    // Renders the GPIO web page
-    server_answer(true, gpio_web_page);
+    // Renders the GPIO panel
+    server_answer(true, gpio_panel);
   }
 }

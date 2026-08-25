@@ -81,7 +81,26 @@ void setup_handles()
 }
 EOF
 fi
-
+if [ \! -f "web_page_h.html" ] ; then cat <<EOF > web_page_h.html
+<html>
+  <head>
+    <title>Your control panel</title>
+    <link rel='stylesheet' href='https://vthierry.github.com/idnai-web/webcontrols.css'/>
+    <script type='text/javascript' src='https://vthierry.github.com/idnai-web/webcontrols.js'></script>
+    <script type='text/javascript' src='https://vthierry.github.com/idnai-web/fetchService.js'></script>
+  </head>
+  <body style='width:820px'>
+    <h1>Your control panel</h1>
+    <div class='button-bar'>
+      <button title='Ping the web service to verify if alive' onclick='fetchService("@/hi", (r)->consoleLog(r));' style='background-color:yellow'>Ping</button>
+      <button title='Restart the ESP32 microcontroler' onclick='fetchService("@/restart", (r)->consoleLog(r));' style='background-color:red'>Restart</button>
+      <a class='button' href="./gpio/">GPIO pannel</a>
+    </div>
+    <script>webcontrols.addConsole();</script>
+  </body>
+</html>
+EOF
+				      
 ln -s node_modules/indnai-esp32/src/esp32.cpp
 
 ln -s node_modules/indnai-esp32/src/gpio_handles.cpp

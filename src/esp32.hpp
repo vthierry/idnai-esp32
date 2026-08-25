@@ -87,15 +87,15 @@ void service_answer(bool ok, const char *fmt, ...);
 // Loop and time functions
 
 /**
- * @function fmillis
+ * @function now
  * @static
- * @description Returns the current time in millisecond at a microsecond precision.
+ * @description Returns the current time in second at a microsecond precision.
  * @param {bool} [reset=false] If true, resets the time value to '0' (thus, this call returns ``0´´).
- * @return double The current time, since the processor reset.
+ * @return double The current time, in second, starting since the processor boot.
  *  - Returns a full precision in micro-seconds for about 142 years, using the 52 bit matissa,
  *  - Avoids overflow for longer than the universes age.
  */
-double fmillis(bool reset = false);
+double now(bool reset = false);
 
 /**
  * @function getLoopDelay
@@ -108,7 +108,7 @@ double fmillis(bool reset = false);
  *   - about 40 µsec every 10 msec for the web service handle mechanism monitoring, when no request.
  *   - about 15 µsec by char (rough estimation) for a print on the serial interface.
  *   - about 1 msec every 10 sec when in verbose mode to echo the loop-delay on the serial interface.
- * @return double The approximate sample time in milliseconds.
+ * @return double The approximate sample time in seconds.
  */
 double getLoopDelay();
 double getLastLoopDelay();
@@ -237,7 +237,7 @@ void analogRawWrite(unsigned int index, unsigned int value);
  * void IRAM_ATTR timing_handle()
  * {
  *   if(interruptTime == -1)
- *     interruptTime = fmillis();
+ *     interruptTime = now();
  * }
  * pinMode(index, INPUT_PULLUP);
  * attachInterrupt(digitalPinToInterrupt(index), timing_handle, mode);
@@ -266,7 +266,7 @@ void analogRawWrite(unsigned int index, unsigned int value);
  * @static
  * @description Starts time measurement on a GPIO input pin.
  *  - It measures the first occuring event and maintain the value until reset.
- *    - The time is given in milli-seconds since the processor start.
+ *    - The time is given in seconds since the processor start.
  *  - It is used with the complementary functions:
  *    - `time_measurement_get(index)` returns the detected time.
  *    - `time_measurement_reset(index)` resets the detected time to measure a new value.
@@ -279,7 +279,7 @@ void analogRawWrite(unsigned int index, unsigned int value);
  * - FALLING when the input signal changes from hight to low.
  * - CHANGE when the input signal changes from low to high or from hight to low.
  */
-#define time_measurement_start(index, mode) double interruptTime_ ## index = -1; void IRAM_ATTR time_measurement_handle_ ## index() { if(interruptTime_ ## index == -1) interruptTime_ ## index = fmillis(); } pinMode(index, INPUT_PULLUP); attachInterrupt(digitalPinToInterrupt(index), time_measurement_handle_ ## index, mode)
+#define time_measurement_start(index, mode) double interruptTime_ ## index = -1; void IRAM_ATTR time_measurement_handle_ ## index() { if(interruptTime_ ## index == -1) interruptTime_ ## index = now(); } pinMode(index, INPUT_PULLUP); attachInterrupt(digitalPinToInterrupt(index), time_measurement_handle_ ## index, mode)
 #define time_measurement_stop(index) detachInterrupt(digitalPinToInterrupt(index))
 #define time_measurement_reset(index) interruptTime_ ## index = -1; 
 #define time_measurement_get(index) interruptTime_ ## index
@@ -287,7 +287,7 @@ void analogRawWrite(unsigned int index, unsigned int value);
 /**
  * @function runHandler
  * @static
- * @description Calls a handler at specified intervals (in milliseconds, with sub-millisecond precision).
+ * @description Calls a handler at specified intervals (in seconds, with sub-millisecond precision).
  * - Functionalities:
  *   - _Periodic sampling_: The `runHandler(handler, delay)` generates endless periodic sampling.
  *     - This corresponds to the `setInterval(handler, delay)` JavaScript mechanism.
@@ -313,7 +313,7 @@ void analogRawWrite(unsigned int index, unsigned int value);
  * @param {uint} [index = 0] One of the four available timer index.
  * - If index if out of range and a message is issued in the console.
  * @param {callback} handler The `void handler()` function to be called.
- * @param {double} [delay = -1] The interval between two calls, in millisecond (with sub-millisecond precision):
+ * @param {double} [delay = -1] The interval between two calls, in second (with sub-millisecond precision):
  * - With a delay lower than handler runtime the process is simply run as fast as possible.
  * - With a negative delay, e.g., `-1`, the previously running handler, if any, is stopped.
  * @param {uint} [count = -1] The maximal number of calls, or `-1` to never stop.
