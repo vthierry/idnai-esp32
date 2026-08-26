@@ -1,5 +1,13 @@
 #!/bin/bash -e
 
+if [ "$1" = -h -o "$1" = --help ]
+then cat <<EOU
+Internal usage: install
+- Installs the idnai-esp32 framework files.
+EOU
+exit
+fi
+
 backup() {
  if [ -f "$1" ] ; then backup "$1~" ; mv $f $f~ ; fi
 }
