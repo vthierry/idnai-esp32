@@ -52,6 +52,9 @@ void console_echo(bool flush, const char *fmt = NULL, ...)
 
 // Webserver mechanims
 
+#include <WebServer.h>
+WebServer *server = NULL;
+
 void service_on(String route, void (*handler)()) {
   if(server != NULL) {
     server->on(route, HTTP_GET, handler);
@@ -319,8 +322,6 @@ double getRunHandlerLastDelay(unsigned int index) {
 
 #include <WiFi.h>
 #include "wifi.h"
-#include <WebServer.h>
-WebServer *server = NULL;
 
 void updateWebServer()
 {

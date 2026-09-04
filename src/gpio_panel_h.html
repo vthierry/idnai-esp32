@@ -1,8 +1,9 @@
 <html>
   <head>
     <title>GPIO board control panel</title>
-    <link rel='stylesheet' href='https://line.gitlabpages.inria.fr/aide-group/esp32gpiocontrol/webcontrols.css'/>
-    <script type='text/javascript' src='https://line.gitlabpages.inria.fr/aide-group/esp32gpiocontrol/webcontrols.js'></script>
+    <script type='text/javascript' src='https://vthierry.github.io/idnai-web/webcontrols.js'></script>
+    <script type='text/javascript' src='https://vthierry.github.io/idnai-web/fetchService.js'></script>
+    <link rel='stylesheet' href='https://vthierry.github.io/idnai-web/webcontrols.css'/> 
   </head>
   <body style='width:820px'>
     <h1>GPIO board control panel</h1>
@@ -12,30 +13,30 @@
     </div>
     <div class='button-bar'>
       <b>Digital I/O:</b>
-      <button onclick='doCurl("@/gpio", "value=1")' style='background-color:red'>ON</button>
-      <button onclick='doCurl("@/gpio", "value=0")' style='background-color:lightgreen'>OFF</button>
-      <button onclick='doCurl("@/gpio", "")' class='button' style='background-color:magenta'>Get</button> 
-      <button onclick='doCurl("@/gpio", "mode=up")' class='button' style='background-color:magenta'>Get up</button> 
-      <button onclick='doCurl("@/gpio", "mode=down")' class='button' style='background-color:magenta'>Get down</button> 
+      <button onclick='doFetch("@/gpio", "value=1")' style='background-color:red'>ON</button>
+      <button onclick='doFetch("@/gpio", "value=0")' style='background-color:lightgreen'>OFF</button>
+      <button onclick='doFetch("@/gpio", "")' class='button' style='background-color:magenta'>Get</button> 
+      <button onclick='doFetch("@/gpio", "mode=up")' class='button' style='background-color:magenta'>Get up</button> 
+      <button onclick='doFetch("@/gpio", "mode=down")' class='button' style='background-color:magenta'>Get down</button> 
    </div>
     <div class='button-bar'>
       <b>Timing measure:</b>
       <script>webcontrols.addButtonOnOff("timing", { on_text: "Start", off_text: "Stop"}, function(value) {
-        doCurl("@/gpio", "action=" + (value ? "start" : "stop"));
+        doFetch("@/gpio", "action=" + (value ? "start" : "stop"));
       });</script>
-      <button onclick='doCurl("@/gpio", "action=get")' style='background-color:magenta'>Get</button>
+      <button onclick='doFetch("@/gpio", "action=get")' style='background-color:magenta'>Get</button>
     </div>
     <div class='button-bar'>
       <b>Analog I/O:</b>
       <script>webcontrols.addButtonRange("Analog value", {});</script>
-      <button onclick='doCurl("@/gpio", "mode=analog&value="+analog_value)' style='background-color:yellow'>Put</button>
-      <button onclick='doCurl("@/gpio", "mode=analog")' style='background-color:magenta'>Get</button>
+      <button onclick='doFetch("@/gpio", "mode=analog&value="+analog_value)' style='background-color:yellow'>Put</button>
+      <button onclick='doFetch("@/gpio", "mode=analog")' style='background-color:magenta'>Get</button>
     </div>
     <script>
       webcontrols.addConsole(true);
-      function doCurl(url, input, method) {
+      function doFetch(url, input) {
         let index = document.getElementById("index").value;
-        webcontrols.curl(url, input+"&index="+index, method);
+        fetchService(url, input+"&index="+index)l
       }
     </script>
     <div class='button-bar'>
