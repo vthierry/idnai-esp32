@@ -71,8 +71,7 @@ void setup_handles()
   // => Comment or delete the lines of code to invalidate them
   //
   
-  // Confirms the web service is alive
-  // - Returns the alive delay and the average and last loop delay
+  // Confirms the web service is alive, returning the alive delay and the average and last loop delay
   server_on("/hi", handle_alive);
 
   // Restarts the processor
@@ -81,7 +80,7 @@ void setup_handles()
   // Put the processor in deep sleep
   server_on("/sleep", handle_sleep);
 
-  // Handles the web pages
+  // Handles the web page
   server_on("/", handle_web_page);
 
   // Handles the GPIO generic I/O web page

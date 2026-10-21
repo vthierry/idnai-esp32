@@ -51,15 +51,33 @@ void console_echo(bool ok, const char *fmt = NULL, ...);
  * @function service_on
  * @static
  * @description Attachs a handler to a web-service route.
-   * @param {string} route The path defining the service, e.g., "/action".
-   * - It accepts GET or POST requests.
-   * @param {callback} handler. A parameter less method implementing the service.
-   * - It uses the `service_get(name)` method to get argument's value.
-   * - The handler MUST end calling the `service_answer()` function in order to send the response message.
+ * The standard web-services are avalailable:  ################## setup_handles.cpp
+ *```
+ * // Confirms the web service is alive, returning the alive delay and the average and last loop delay.
+ * server_on("/hi", handle_alive);
+ * // Restarts the processor.
+ * server_on("/restart", handle_restart);
+ * // Put the processor in deep sleep.
+ * server_on("/sleep", handle_sleep);
+ * // Handles the web page.
+ * server_on("/", handle_web_page);
+ * // Handles the GPIO generic I/O web page.
+ * server_on("/gpio", handle_gpio);
+ * ```
+ * @param {string} route The path defining the service, e.g., "/action".
+ * - It accepts GET or POST requests.
+ * @param {callback} handler. A parameter less method implementing the service.
+ * - It uses the `service_get(name)` method to get argument's value.
+ * - The handler MUST end calling the `service_answer()` function in order to send the response message.
  * @param {string} route The web-service route.
  * @param {handler} handler A `void (* handler)(void)` handle function.
  */
 void service_on(String route, void (*handler)(void));
+void handle_alive();
+void handle_restart();
+void handle_sleep();
+void handle_web_page();
+void handle_gpio();
 
 /**
  * @function service_get
